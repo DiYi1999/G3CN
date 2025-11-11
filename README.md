@@ -12,7 +12,7 @@ if it is helpful for your research, you can cite the following paper:
 title = {Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network},
 journal = {xxxxxx},
 volume = {xxxxxx},
-pages = {113380},
+pages = {xxxxxx},
 year = {xxxxxx},
 issn = {xxxxxx},
 doi = {xxxxxx},
