@@ -2,6 +2,7 @@
 
 
 
+
 <!-- ### Code, Model, Dataset of [Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network](https://www.sciencedirect.com/science/article/xxxxxx)
 
 
