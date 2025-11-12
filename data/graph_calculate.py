@@ -12,7 +12,7 @@ import os
 from utils.plot_heatmap import plot_adj_heatmap
 from scipy.stats import kendalltau
 from sklearn.feature_selection import mutual_info_regression
-
+from sklearn.metrics import mutual_info_score, normalized_mutual_info_score # don't use this! it not suitable for time series
 
 def A_w_calculate(args, data_normal):
     if isinstance(data_normal, np.ndarray):
@@ -73,6 +73,14 @@ def A_w_calculate(args, data_normal):
             A_w[i+1:, i] = mi
         A_w[A_w < 0] = 0
         A_w = A_w / A_w.max() if A_w.max() != 0 else A_w
+        np.fill_diagonal(A_w, 1)
+    elif args.graph_ca_meth == "MutualInfo_Wrong":        # don't use this! it not suitable for time series
+        for i in range(0, node_num - 1):
+            for j in range(i + 1, node_num):
+                # A_w[i, j] = mutual_info_score(data[:, i], data[:, j])
+                A_w[i, j] = normalized_mutual_info_score(data[:, i], data[:, j])
+                A_w[j, i] = A_w[i, j]
+        # 对角线置1
         np.fill_diagonal(A_w, 1)
     else:
         raise ValueError("method should be MIC or Copent or Cosine")
