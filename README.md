@@ -19,11 +19,15 @@ keywords = {multivariate time series, graph neural network, complex multi-sensor
 
 #### For ease of use, we extract the core code as follows:
 
-### Core Code One, G3CN:
+### Core Code One, [G3CN](./model/ours/spatial_block.py):
 
 ```python
 class Multi_Layer_G3CN(nn.Module):
     def __init__(self, args):
+        """
+        this is Multi-layer G3CN, deepening network depth helps reduce network width burden, try its G3CN_Layer_K_nums as [32,32], [64,64], [128,128], [256,256], even more layers [256,256,256] etc
+        input X: (batch_size, node_num, lag) and adjacency matrix A: (node_num, node_num), output H: (batch_size, node_num, lag)
+        """
         super(Multi_Layer_G3CN, self).__init__()
         self.args = args
         G3CN_Layer_list = []
@@ -44,6 +48,10 @@ class Multi_Layer_G3CN(nn.Module):
 
 class G3CN(nn.Module):
     def __init__(self, args, K=None):
+        """
+        this is G3CN, its K must be large enough, try 32, 64, 128, 256
+        input X: (batch_size, node_num, lag) and adjacency matrix A: (node_num, node_num), output H: (batch_size, node_num, lag)
+        """
         super(G3CN, self).__init__()
         self.args = args
         self.K = args.K
@@ -70,6 +78,9 @@ class G3CN(nn.Module):
 
 class OneAdjG3CN(nn.Module):
     def __init__(self, args):
+        """
+        v*ReLU(_AX+b) but weighted_A=A⊙W, input X: (batch_size, node_num, lag) and adjacency matrix A: (node_num, node_num), output H: (batch_size, node_num, lag)
+        """
         super(OneAdjG3CN, self).__init__()
         self.args = args
         self.W = Parameter(torch.Tensor(args.node_num, args.node_num))
@@ -92,7 +103,7 @@ class OneAdjG3CN(nn.Module):
         return H
 ```
 
-### Core Code Two, Computing the adjacency matrix via non-linear metrics:
+### Core Code Two, [Computing the adjacency matrix via non-linear metrics](./data/graph_calculate.py):
 
 ```python
 from minepy import MINE
@@ -159,9 +170,38 @@ def A_w_calculate(args, data_normal):
         raise ValueError("method should be MIC or Copent or ...")
 
     return A_w
+
+def A_other_calculate(args, A_w, if_return_norm=False):
+    node_num = A_w.shape[0]
+    A = np.zeros((node_num, node_num)).astype(np.float32)
+    A[A_w >= args.graph_ca_thre] = 1
+    np.fill_diagonal(A, 0)
+    A_self = A + np.eye(node_num).astype(np.float32)
+
+    for i in range(node_num):
+        if np.sum(A[i]) == 0:
+            max2_index = np.argsort(A_w[i])[-2]
+            A[i, max2_index] = 1
+            A[max2_index, i] = 1
+
+    if if_return_norm:
+        degree = np.sum(A, axis=1)
+        degree_inv_sqrt = np.power(degree, -0.5)
+        degree_inv_sqrt[np.isinf(degree_inv_sqrt)] = 0
+        D_inv_sqrt = np.diag(degree_inv_sqrt)
+        A_norm = np.matmul(np.matmul(D_inv_sqrt, A), D_inv_sqrt)
+        degree_self = np.sum(A_self, axis=1)
+        degree_self_inv_sqrt = np.power(degree_self, -0.5)
+        degree_self_inv_sqrt[np.isinf(degree_self_inv_sqrt)] = 0
+        D_self_inv_sqrt = np.diag(degree_self_inv_sqrt)
+        A_self_norm = np.matmul(np.matmul(D_self_inv_sqrt, A_self), D_self_inv_sqrt)
+
+        return A, A_self, A_w, A_norm, A_self_norm
+    else:
+        return A, A_self, A_w
 ```
 
-### Core Code Three, Multi-scale decomposition:
+### Core Code Three, [Multi-scale decomposition](./utils/decompose.py):
 
 Since this part of the code is relatively lengthy, you can refer directly to [utils/decompose.py](./utils/decompose.py). However, it is not strictly required and can be regarded as an auxiliary component. In ordinary scenarios, the two core code snippets above are sufficient to solve the problem.
 
