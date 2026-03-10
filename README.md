@@ -1,30 +1,26 @@
-### G3CN
+#### G3CN Project
 
-
-
-
-<!-- ### Code, Model, Dataset of [Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network](https://www.sciencedirect.com/science/article/xxxxxx)
-
+### Code and Data of [Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network](https://doi.org/10.1016/j.patcog.2026.113388)
 
 if it is helpful for your research, you can cite the following paper:
 ```bibtex
-@article{xxxxxx,
+@article{DI2026113388,
 title = {Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network},
-journal = {xxxxxx},
-volume = {xxxxxx},
-pages = {xxxxxx},
-year = {xxxxxx},
-issn = {xxxxxx},
-doi = {xxxxxx},
-url = {xxxxxx}
+journal = {Pattern Recognition},
+pages = {113388},
+year = {2026},
+issn = {0031-3203},
+doi = {https://doi.org/10.1016/j.patcog.2026.113388},
+url = {https://www.sciencedirect.com/science/article/pii/S0031320326003535},
+author = {Yi Di and Fujin Wang and Zhi Zhai and Zhibin Zhao and Xuefeng Chen},
+keywords = {multivariate time series, graph neural network, complex multi-sensor system, spatial information, nonlinear correlation}
 }
 ```
 
+#### For ease of use, we extract the core code as follows:
 
-And we We are currently developing a more comprehensive and enhanced version of our dataset. If you are interested, welcome to follow our updates. We hope it will be helpful to you: [https://diyi1999.github.io/XJTU-SPS/](https://diyi1999.github.io/XJTU-SPS/) -->
+### Core Code One, G3CN:
 
-<!-- 
-Core Code of G3CN:
 ```python
 class Multi_Layer_G3CN(nn.Module):
     def __init__(self, args):
@@ -94,8 +90,78 @@ class OneAdjG3CN(nn.Module):
         v = self.v.unsqueeze(0).unsqueeze(2)
         H = v * H
         return H
+```
 
-``` -->
+### Core Code Two, Computing the adjacency matrix via non-linear metrics:
 
+```python
+from minepy import MINE
+from minepy import pstats, cstats
+from copent import copent
+from scipy.stats import kendalltau
+from sklearn.feature_selection import mutual_info_regression
 
+def A_w_calculate(args, data_normal):
+    if isinstance(data_normal, np.ndarray):
+        data = data_normal
+    elif isinstance(data_normal, pd.DataFrame):
+        data = data_normal.values
+    elif isinstance(data_normal, torch.Tensor):
+        data = data_normal.cpu().numpy()
+    else:
+        raise ValueError("data_normal should be np.ndarray or pd.DataFrame")
+    ca_len, node_num = data.shape
+    A_w = np.zeros((node_num, node_num)).astype(np.float32)
+    if args.graph_ca_meth == "MIC":
+        # for i in range(0, node_num - 1):
+        #     for j in range(i + 1, node_num):
+        #         mine = MINE(alpha=args.MIC_alpha, c=args.MIC_c, est="mic_approx")
+        #         mine.compute_score(data[:, i], data[:, j])
+        #         A_w[i, j] = mine.mic()
+        #         A_w[j, i] = A_w[i, j]
+        # np.fill_diagonal(A_w, 1)
+        data_T = data.T
+        mic_p, tic_p =  pstats(data_T, alpha=args.MIC_alpha, c=args.MIC_c, est="mic_e")
+        A_w = np.zeros((node_num, node_num)).astype(np.float32)
+        triu_idx = np.triu_indices(node_num, k=1)
+        A_w[triu_idx] = mic_p
+        A_w += A_w.T
+        np.fill_diagonal(A_w, 1)
+    elif args.graph_ca_meth == "Copent":
+        for i in range(0, node_num - 1):
+            for j in range(i + 1, node_num):
+                data1 = data[:, [i, j]]
+                A_w[i, j] = copent(data1)
+                A_w[j, i] = A_w[i, j]
+        A_w = (A_w - A_w.min()) / (A_w.max() - A_w.min() + 1e-5)
+        np.fill_diagonal(A_w, 1)
+    elif args.graph_ca_meth == "Kendall":
+        for i in range(0, node_num - 1):
+            for j in range(i + 1, node_num):
+                tau, _ = kendalltau(data[:, i], data[:, j])
+                if np.isnan(tau):
+                    tau = 0
+                A_w[i, j] = tau
+                A_w[j, i] = A_w[i, j]
+        np.fill_diagonal(A_w, 1)
+        A_w = np.abs(A_w)
+    elif args.graph_ca_meth == "MutualInfo":
+        for i in range(0, node_num - 1):
+            X = data[:, i+1:]
+            y = data[:, i]
+            mi = mutual_info_regression(X, y)
+            A_w[i, i+1:] = mi
+            A_w[i+1:, i] = mi
+        A_w[A_w < 0] = 0
+        A_w = A_w / A_w.max() if A_w.max() != 0 else A_w
+        np.fill_diagonal(A_w, 1)
+    else:
+        raise ValueError("method should be MIC or Copent or ...")
+
+    return A_w
+```
+
+### Core Code Three, Multi-scale decomposition:
+
+Since this part of the code is relatively lengthy, you can refer directly to [utils/decompose.py](./utils/decompose.py). However, it is not strictly required and can be regarded as an auxiliary component. In ordinary scenarios, the two core code snippets above are sufficient to solve the problem.
 

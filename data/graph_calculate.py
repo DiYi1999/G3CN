@@ -4,12 +4,12 @@ from pandas import read_csv
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from minepy import MINE
-from minepy import pstats, cstats
-from copent import copent
 import torch
 import os
 from utils.plot_heatmap import plot_adj_heatmap
+from minepy import MINE
+from minepy import pstats, cstats
+from copent import copent
 from scipy.stats import kendalltau
 from sklearn.feature_selection import mutual_info_regression
 from sklearn.metrics import mutual_info_score, normalized_mutual_info_score # don't use this! it not suitable for time series
