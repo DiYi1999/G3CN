@@ -1,4 +1,5 @@
-#### G3CN Project
+## G3CN Project: A graph neural network, compared with GCN and GAT, G3CN focuses on multi-sensor time series, especially when the correlation between sensor variables is not "similarity" but "complex nonlinear correlation".
+
 
 ### Code and Data of [Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network](https://doi.org/10.1016/j.patcog.2026.113388)
 
@@ -17,7 +18,7 @@ keywords = {multivariate time series, graph neural network, complex multi-sensor
 }
 ```
 
-#### For ease of use, we extract the core code as follows:
+## For ease of use, we extract the core code as follows:
 
 ### Core Code One, [G3CN](./model/ours/spatial_block.py):
 
