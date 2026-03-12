@@ -20,7 +20,9 @@ abstract = {Spatial temporal graph neural networks (STGNNs) are effective tools 
 }
 ```
 
-## For ease of use, we extract the core code as follows:
+<br>
+
+## To make it easier to use, we extract the core code as follows:
 
 ### Core Code One, [G3CN](./model/ours/spatial_block.py):
 
