@@ -6,15 +6,17 @@
 if it is helpful for your research, you can cite the following paper:
 ```bibtex
 @article{DI2026113388,
-title = {Beyond the Homophily Assumption: Mining Complex Correlations in Time Series via Graph Neural Network},
+title = {Beyond the homophily assumption: Mining complex correlations in time series via graph neural network},
 journal = {Pattern Recognition},
+volume = {178},
 pages = {113388},
 year = {2026},
 issn = {0031-3203},
 doi = {https://doi.org/10.1016/j.patcog.2026.113388},
 url = {https://www.sciencedirect.com/science/article/pii/S0031320326003535},
 author = {Yi Di and Fujin Wang and Zhi Zhai and Zhibin Zhao and Xuefeng Chen},
-keywords = {multivariate time series, graph neural network, complex multi-sensor system, spatial information, nonlinear correlation}
+keywords = {Multivariate time series, Graph neural network, Complex multi-sensor system, Spatial information, Nonlinear correlation},
+abstract = {Spatial temporal graph neural networks (STGNNs) are effective tools for adequately mining the temporal and spatial correlations within multivariate time series (MTS). However, in recent years, their development has encountered bottlenecks, their performance in tasks within complex correlated multi-sensor systems (CCMS) has been underwhelming. We conducted a comprehensive analysis and discovered that the crux lies in the fact that CCMS do not conform to the homophily assumption, whereas most GNN modules utilized in existing STGNNs are developed based on this assumption. To solve this problem, this work proposes a new spatial information mining paradigm: graph based spatial information mining paradigm for CCMS (CCMS-GSIMP). It is a pipeline consisting of: a specific data preprocessing, a new graph structure construction method, and a novel graph convolution method. Firstly, in the data preprocessing phase, to extract correlated sub-components and simplify the capture of nonlinear correlations, multi-scale decomposition needs to be deployed. After that, in the graph structure construction phase, to evaluate both linear and nonlinear correlation strengths, we introduce the maximum information coefficient (MIC) metric. Finally, in the complex correlation capturing phase, a novel graph based complex correlation capturing network (G3CN), has been theoretical proposed. Additionally, this work has conducted performance evaluation and ablation studies on synthetic and real-world datasets. And the discussion section delves into some cutting-edge hypotheses such as over-smoothing and spatial indistinguishability. Our data and codes are available at https://github.com/DiYi1999/G3CN.}
 }
 ```
 
